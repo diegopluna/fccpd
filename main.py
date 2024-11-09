@@ -2,7 +2,7 @@ import os
 import sys
 from typing import Optional, Dict, Any
 from db.conn import DatabaseConnection
-from db.schema import User
+from db.schema import User, Question
 from db.repository import UserRepository, QuestionRepository, GameRepository, RepositoryError
 from quiz_api import QuizAPI, QuizAPIError
 import logging
@@ -149,6 +149,97 @@ class MenuManager:
             print("An error occurred while processing your request")
             if hasattr(e, 'original_error'):
                 logger.error(f"Original error: {str(e.original_error)}")
+    
+    def handle_question_operations(self, choice: str):
+        """Handle question-related operations."""
+        try:
+            if choice == "5":
+                question = {
+                    "question": self.get_user_input("Enter question: "),
+                    "description": self.get_user_input("Enter description: "),
+                    "answers": {
+                        "answer_a": self.get_user_input("Enter answer A: "),
+                        "answer_b": self.get_user_input("Enter answer B: "),
+                        "answer_c": self.get_user_input("Enter answer C: "),
+                        "answer_d": self.get_user_input("Enter answer D: "),
+                        "answer_e": self.get_user_input("Enter answer E: "),
+                        "answer_f": self.get_user_input("Enter answer F: ")
+                    },
+                    "multiple_correct_answers": False, # recomendo tirar isso aqui
+                    "correct_answers": {
+                        "answer_a_correct": False,
+                        "answer_b_correct": False,
+                        "answer_c_correct": False,
+                        "answer_d_correct": False,
+                        "answer_e_correct": False,
+                        "answer_f_correct": False
+                    },
+                    "explanation": self.get_user_input("Enter explanation: "),
+                    "tip": self.get_user_input("Enter tip (or press Enter to skip): "),
+                    "tags": [tag.strip() for tag in self.get_user_input("Enter tags (comma-separated): ").split(",")],
+                    "category": self.get_user_input("Enter category: "),
+                    "difficulty": self.get_user_input("Enter difficulty (easy/medium/hard): ")
+                }
+
+                print(f"{question['question']}\n")
+                for key, answer in question['answers'].items():
+                    print(f"{key[-1].upper()}) {answer}")
+
+                correct_answers = [answer.strip() for answer in self.get_user_input("Enter correct answers (comma-separated): ").lower().split(",") if answer in ['a', 'b', 'c', 'd', 'e', 'f']]
+                for answer in correct_answers:
+                    key = f"answer_{answer.lower()}_correct"
+                    question['correct_answers'][key] = True
+
+                answers_list = [ question["answers"][f"answer_{letter}"] for letter in "abcdef" ]
+
+                correct_answers_list = [ question["correct_answers"].get(f"answer_{letter}_correct", False) for letter in "abcdef"]
+
+                new_question = Question(
+                    question=question["question"],
+                    description=question["description"],
+                    answers=answers_list,
+                    correct_answers=correct_answers_list,
+                    explanation=question["explanation"],
+                    tip=question["tip"] if question["tip"] else None,
+                    tags=question["tags"],
+                    category=question["category"],
+                    difficulty=question["difficulty"]
+                )
+                
+                saved_question = self.question_repo.create(new_question)
+                logger.info(f"Created question: {saved_question.question}")
+                print(f"Question created successfully! ID: {saved_question.id}")
+                
+            elif choice == "6":
+                question_id = self.get_user_input("Enter question ID: ", str.isdigit)
+                if question_id:
+                    question = self.question_repo.get_by_id(int(question_id))
+                    if question:
+                        print(f"Question: {question.question}")
+                        print(f"Description: {question.description}")
+                        print(f"Category: {question.category}")
+                        print(f"Difficulty: {question.difficulty}")
+                        print(f"Tags: {', '.join(question.tags)}")
+                        print(f"Tip: {question.tip}")
+                        print(f"Explanation: {question.explanation}")
+                        print("Answers:")
+                        for letter, answer, correctness in zip("abcdef", question.answers, question.correct_answers):
+                            print(f"{letter}) {answer} ({'Correct' if correctness else 'Incorrect'})")
+                        print(question.correct_answers)
+                    else:
+                        print("Question not found")
+            
+            elif choice == "7":
+                print("Update Question")
+                print("Not implemented yet")
+            
+            elif choice == "8":
+                print("Delete Question")
+                print("Not implemented yet")
+        
+        except RepositoryError as e:
+            logger.error(f"Repository error in game operations: {str(e)}")
+            print("An error occurred while processing your request")
                 
     def handle_game_operations(self, choice: str):
         """Handle game-related operations."""
