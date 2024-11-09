@@ -1,59 +1,75 @@
-from conn import DatabaseConnection
-from schema import Question, Game
+from .conn import DatabaseConnection
+from .schema import Question, Game, User, GameQuestion
 from typing import List, Optional
+
+class UserRepository:
+    def __init__(self, db_connection: DatabaseConnection):
+        self.db = db_connection
+    
+    def create_user(self, username: str) -> Optional[User]:
+        conn = self.db.get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO users (username)
+                    VALUES (%s)
+                    RETURNING id
+                """, (username,))
+                user_id = cur.fetchone()[0]
+                conn.commit()
+                return User(id=user_id, username=username)
+        except Exception as e:
+            conn.rollback()
+            raise e
+        finally:
+            self.db.return_connection(conn)
+    
+    def get_user_by_id(self, user_id: int) -> Optional[User]:
+        conn = self.db.get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id, username FROM users WHERE id = %s", (user_id,))
+                result = cur.fetchone()
+                return User(id=result[0], username=result[1]) if result else None
+        finally:
+            self.db.return_connection(conn)
 
 class QuestionRepository:
     def __init__(self, db_connection: DatabaseConnection):
         self.db = db_connection
 
-    def create_question(self, question: Question, answers: List[tuple[str, bool]], tags: List[str]) -> Optional[Question]:
+    def create_question(self, question: Question) -> Optional[Question]:
         conn = self.db.get_connection()
         try:
+            print("Creating question")
             with conn.cursor() as cur:
-                # Insert question
                 cur.execute("""
-                    INSERT INTO questions (question, description, explanation, tip, category_id, difficulty_id)
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    INSERT INTO questions (
+                        question, description, explanation, 
+                        category, difficulty, answers, correct_answers
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
                     RETURNING id
                 """, (
-                    question.question, question.description, question.explanation,
-                    question.tip, question.category_id, question.difficulty_id
+                    question.question,
+                    question.description,
+                    question.explanation,
+                    question.category,
+                    question.difficulty,
+                    question.answers,
+                    question.correct_answers
                 ))
+                print("Question created")
                 question_id = cur.fetchone()[0]
-
-                # Insert answers
-                for idx, (answer_text, is_correct) in enumerate(answers):
-                    cur.execute("""
-                        WITH inserted_answer AS (
-                            INSERT INTO answers (text)
-                            VALUES (%s)
-                            RETURNING id
-                        )
-                        INSERT INTO question_answers (question_id, answer_id, is_correct, order_index)
-                        SELECT %s, id, %s, %s
-                        FROM inserted_answer
-                    """, (answer_text, question_id, is_correct, idx))
-
-                # Insert tags
-                for tag_name in tags:
-                    cur.execute("""
-                        WITH inserted_tag AS (
-                            INSERT INTO tags (name)
-                            VALUES (%s)
-                            ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
-                            RETURNING id
-                        )
-                        INSERT INTO question_tags (question_id, tag_id)
-                        SELECT %s, id
-                        FROM inserted_tag
-                    """, (tag_name, question_id))
-
                 conn.commit()
-                return self.get_question_by_id(question_id)
+                
+                # Update the question id and return
+                question.id = question_id
+                return question
+                
         except Exception as e:
             conn.rollback()
-            print(f"Error creating question: {e}")
-            return None
+            raise e
         finally:
             self.db.return_connection(conn)
 
@@ -62,7 +78,7 @@ class QuestionRepository:
         try:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT id, question, description, explanation, tip, category_id, difficulty_id
+                    SELECT id, question, description, explanation, category, difficulty, answers, correct_answers
                     FROM questions
                     WHERE id = %s
                 """, (question_id,))
@@ -76,7 +92,7 @@ class QuestionRepository:
 class GameRepository:
     def __init__(self, db_connection: DatabaseConnection):
         self.db = db_connection
-
+    
     def create_game(self, user_id: int, rounds: int) -> Optional[Game]:
         conn = self.db.get_connection()
         try:
@@ -84,54 +100,76 @@ class GameRepository:
                 cur.execute("""
                     INSERT INTO games (user_id, rounds, score)
                     VALUES (%s, %s, 0)
-                    RETURNING id, user_id, rounds, score, created_at
+                    RETURNING id, created_at
                 """, (user_id, rounds))
+                game_id, created_at = cur.fetchone()
                 conn.commit()
-                result = cur.fetchone()
-                if result:
-                    return Game(*result)
+                return Game(id=game_id, user_id=user_id, rounds=rounds, 
+                          score=0, created_at=created_at)
         except Exception as e:
             conn.rollback()
-            print(f"Error creating game: {e}")
-            return None
+            raise e
         finally:
             self.db.return_connection(conn)
-
-    def answer_question(self, game_id: int, question_id: int, answer_id: int) -> bool:
+    
+    def add_game_questions(self, game_id: int, question_ids: List[int]) -> bool:
         conn = self.db.get_connection()
         try:
             with conn.cursor() as cur:
-                # Check if answer is correct
-                cur.execute("""
-                    SELECT is_correct 
-                    FROM question_answers 
-                    WHERE question_id = %s AND answer_id = %s
-                """, (question_id, answer_id))
-                result = cur.fetchone()
-                is_correct = result[0] if result else False
-
-                # Update game_questions
-                cur.execute("""
-                    UPDATE game_questions 
-                    SET selected_answer_id = %s,
-                        is_correct = %s,
-                        answered_at = CURRENT_TIMESTAMP
-                    WHERE game_id = %s AND question_id = %s
-                """, (answer_id, is_correct, game_id, question_id))
-
-                # Update game score if answer is correct
-                if is_correct:
+                for question_id in question_ids:
                     cur.execute("""
-                        UPDATE games 
-                        SET score = score + 1
-                        WHERE id = %s
-                    """, (game_id,))
-
+                        INSERT INTO game_questions (game_id, question_id)
+                        VALUES (%s, %s)
+                    """, (game_id, question_id))
                 conn.commit()
                 return True
         except Exception as e:
             conn.rollback()
-            print(f"Error answering question: {e}")
-            return False
+            raise e
+        finally:
+            self.db.return_connection(conn)
+    
+    def get_game(self, game_id: int) -> Optional[Game]:
+        conn = self.db.get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT id, user_id, rounds, score, created_at 
+                    FROM games WHERE id = %s
+                """, (game_id,))
+                result = cur.fetchone()
+                if result:
+                    return Game(
+                        id=result[0],
+                        user_id=result[1],
+                        rounds=result[2],
+                        score=result[3],
+                        created_at=result[4]
+                    )
+                return None
+        finally:
+            self.db.return_connection(conn)
+    
+    def get_game_questions(self, game_id: int) -> List[GameQuestion]:
+        conn = self.db.get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT id, game_id, question_id, selected_answer_index, 
+                           is_correct, answered_at
+                    FROM game_questions 
+                    WHERE game_id = %s
+                """, (game_id,))
+                return [
+                    GameQuestion(
+                        id=row[0],
+                        game_id=row[1],
+                        question_id=row[2],
+                        selected_answer_index=row[3],
+                        is_correct=row[4],
+                        answered_at=row[5]
+                    )
+                    for row in cur.fetchall()
+                ]
         finally:
             self.db.return_connection(conn)

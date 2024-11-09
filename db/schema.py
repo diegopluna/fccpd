@@ -1,12 +1,7 @@
 from dataclasses import dataclass
-from enum import Enum
 from typing import Optional, List
 from datetime import datetime
 
-class DifficultyLevel(Enum):
-    EASY = 1
-    MEDIUM = 2
-    HARD = 3
 
 @dataclass
 class User:
@@ -20,7 +15,7 @@ class Question:
     description: str
     explanation: str
     category: str
-    difficulty: DifficultyLevel
+    difficulty: str
     answers: List[str]
     correct_answers: List[bool]
     

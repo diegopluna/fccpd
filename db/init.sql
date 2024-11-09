@@ -1,16 +1,16 @@
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL
+    username VARCHAR(255) UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS questions (
     id SERIAL PRIMARY KEY,
-    question VARCHAR(100) NOT NULL,
-    description VARCHAR(100) NOT NULL,
-    explanation VARCHAR(100) NOT NULL,
-    category VARCHAR(100) NOT NULL,
-    difficulty VARCHAR(100) NOT NULL,
-    answers VARCHAR(100)[] NOT NULL,
+    question VARCHAR(255) NOT NULL,
+    description VARCHAR(255),
+    explanation VARCHAR(255),
+    category VARCHAR(255) NOT NULL,
+    difficulty VARCHAR(255) NOT NULL,
+    answers VARCHAR(255)[] NOT NULL,
     correct_answers BOOLEAN[] NOT NULL
 );
 

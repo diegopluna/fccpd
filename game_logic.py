@@ -1,5 +1,5 @@
 from typing import Dict
-from .quiz_api import QuizAPI
+from quiz_api import QuizAPI
 
 class QuizGame:
     def __init__(self, api_key: str):
@@ -11,12 +11,14 @@ class QuizGame:
 
     def start_new_game(self, category: str = None, difficulty: str = None, 
                       num_questions: int = 10) -> None:
+        print("Starting new game")
         """Start a new game by fetching questions"""
         self.questions = self.quiz_api.get_questions(
             category=category,
             difficulty=difficulty,
             limit=num_questions
         )
+        print("Questions fetched")
         self.total_questions = len(self.questions)
         self.current_question = 0
         self.current_score = 0

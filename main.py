@@ -1,409 +1,215 @@
-import os
-import sys
-from typing import Optional, Dict, Any
+from datetime import datetime
+from typing import Optional
 from db.conn import DatabaseConnection
-from db.schema import User, Question
-from db.repository import UserRepository, QuestionRepository, GameRepository, RepositoryError
-from quiz_api import QuizAPI, QuizAPIError
+from db.schema import User, Question, Game
+from db.repository import UserRepository, QuestionRepository, GameRepository
+from game_logic import QuizGame
 import logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('quiz_game.log'),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-class MenuManager:
-    def __init__(self):
+class QuizApplication:
+    def __init__(self, api_key: str):
         self.db = DatabaseConnection()
-        self.session = None
-        self.user_repo = None
-        self.question_repo = None
-        self.game_repo = None
-        self.quiz_api = None
+        self.user_repo = UserRepository(self.db)
+        self.game_repo = GameRepository(self.db)
+        self.question_repo = QuestionRepository(self.db)
+        self.game_logic = QuizGame(api_key)
         
-    def initialize(self) -> bool:
-        """Initialize database connection and repositories."""
+    def register_user(self, username: str) -> Optional[User]:
         try:
-            db_connect = self.db.connect()
-            if not db_connect:
-                logger.error("Failed to connect to database")
-                return False
-            
-            self.user_repo = UserRepository(session_factory=self.db.get_session)
-            self.question_repo = QuestionRepository(session_factory=self.db.get_session)
-            self.game_repo = GameRepository(session_factory=self.db.get_session)
-            
-            # Initialize QuizAPI with key from environment
-            api_key = "Nu4Q4o5IFPwgTUWcEmgWUpwyK06B3yGg3TbmkkTM"
-            # if not api_key:
-            #     logger.error("QUIZ_API_KEY environment variable not set")
-            #     return False
-            
-            self.quiz_api = QuizAPI(api_key)
-            return True
-            
+            user = self.user_repo.create_user(username)
+            logger.info(f"Created new user: {username}")
+            return user
         except Exception as e:
-            logger.error(f"Initialization error: {str(e)}")
-            return False
+            logger.error(f"Failed to create user: {str(e)}")
+            return None
         
-    def clear_screen(self):
-        """Clear the terminal screen."""
-        os.system('cls' if os.name == 'nt' else 'clear')
-        
-    def print_menu(self):
-        """Display the main menu."""
-        self.clear_screen()
-        print(
-            """
-            === Quiz Game Management System ===
-
-            User Operations:
-            1. Create User
-            2. View User
-            3. Update User
-            4. Delete User
-
-            Question Operations:
-            5. Add Question
-            6. View Question
-            7. Update Question
-            8. Delete Question
-
-            Game Operations:
-            9. Start New Game
-            10. View Game History
-            11. View Leaderboard
-            12. Delete Game
-
-            13. Exit
-            """
-        )
-    
-    def get_user_input(self, prompt: str, validate_func=None) -> Optional[str]:
-        """Get and validate user input."""
-        while True:
-            value = input(prompt).strip()
-            if not value:
+    def start_game(self, user_id: int, num_rounds: int) -> Optional[Game]:
+        logger.info(f"Starting new game for user {user_id}")
+        try:
+            logger.debug(f"Fetching user {user_id}")
+            # Create new game
+            game = self.game_repo.create_game(user_id, num_rounds)
+            logger.debug(f"Created game {game}")
+            if not game:
                 return None
-            if validate_func is None or validate_func(value):
-                return value
-            print("Invalid input. Please try again.")
+                
+            # Fetch questions from API
+            logger.debug(f"Fetching questions from API")
+            self.game_logic.start_new_game(num_questions=num_rounds)
             
-    def handle_user_operations(self, choice: str):
-        """Handle user-related operations."""
-        try:
-            if choice == "1":
-                username = self.get_user_input("Enter username: ")
-                if username:
-                    dict_user = {"username": username}
-                    new_user = User(**dict_user)
-                    user = self.user_repo.create(new_user)
-                    logger.info(f"Created user: {username}")
-                    print(f"User created successfully! ID: {user.id}")
-                    
-            elif choice == "2":
-                user_id = self.get_user_input("Enter user ID: ", str.isdigit)
-                if user_id:
-                    user = self.user_repo.get_by_id(int(user_id))
-                    if user:
-                        print(f"User found: {user.username}")
-                        games = self.game_repo.get_by_user(user)
-                        print(f"Total games played: {len(games)}")
-                    else:
-                        print("User not found")
-                        
-            elif choice == "3":
-                user_id = self.get_user_input("Enter user ID: ", str.isdigit)
-                if user_id:
-                    user = self.user_repo.get_by_id(int(user_id))
-                    if user:
-                        print(f"User found: {user.username}")
-                        new_username = self.get_user_input("Enter new username: ")
-                        if new_username:
-                            user.username = new_username
-                            self.user_repo.update(user)
-                            print("User updated successfully!")
-                        else:
-                            print("User not found")
-                            
-            elif choice == "4":
-                user_id = self.get_user_input("Enter user ID: ", str.isdigit)
-                if user_id:
-                    user = self.user_repo.get_by_id(int(user_id))
-                    print(f"User found: {user.username}")
-                    if user:
-                        confirm = input("Are you sure? This will delete all user data (y/n): ")
-                        if confirm.lower() == 'y':
-                            if self.user_repo.delete(int(user_id)):
-                                print("User deleted successfully!")
-                            else:
-                                print("User not found")
-                            
-        except RepositoryError as e:
-            logger.error(f"Repository error in user operations: {str(e)}")
-            print("An error occurred while processing your request")
-            if hasattr(e, 'original_error'):
-                logger.error(f"Original error: {str(e.original_error)}")
-    
-    def handle_question_operations(self, choice: str):
-        """Handle question-related operations."""
-        try:
-            if choice == "5":
-                question = {
-                    "question": self.get_user_input("Enter question: "),
-                    "description": self.get_user_input("Enter description: "),
-                    "answers": {
-                        "answer_a": self.get_user_input("Enter answer A: "),
-                        "answer_b": self.get_user_input("Enter answer B: "),
-                        "answer_c": self.get_user_input("Enter answer C: "),
-                        "answer_d": self.get_user_input("Enter answer D: "),
-                        "answer_e": self.get_user_input("Enter answer E: "),
-                        "answer_f": self.get_user_input("Enter answer F: ")
-                    },
-                    "multiple_correct_answers": False, # recomendo tirar isso aqui
-                    "correct_answers": {
-                        "answer_a_correct": False,
-                        "answer_b_correct": False,
-                        "answer_c_correct": False,
-                        "answer_d_correct": False,
-                        "answer_e_correct": False,
-                        "answer_f_correct": False
-                    },
-                    "explanation": self.get_user_input("Enter explanation: "),
-                    "tip": self.get_user_input("Enter tip (or press Enter to skip): "),
-                    "tags": [tag.strip() for tag in self.get_user_input("Enter tags (comma-separated): ").split(",")],
-                    "category": self.get_user_input("Enter category: "),
-                    "difficulty": self.get_user_input("Enter difficulty (easy/medium/hard): ")
-                }
-
-                print(f"{question['question']}\n")
-                for key, answer in question['answers'].items():
-                    print(f"{key[-1].upper()}) {answer}")
-
-                correct_answers = [answer.strip() for answer in self.get_user_input("Enter correct answers (comma-separated): ").lower().split(",") if answer in ['a', 'b', 'c', 'd', 'e', 'f']]
-                for answer in correct_answers:
-                    key = f"answer_{answer.lower()}_correct"
-                    question['correct_answers'][key] = True
-
-                answers_list = [ question["answers"][f"answer_{letter}"] for letter in "abcdef" ]
-
-                correct_answers_list = [ question["correct_answers"].get(f"answer_{letter}_correct", False) for letter in "abcdef"]
-
-                new_question = Question(
-                    question=question["question"],
-                    description=question["description"],
-                    answers=answers_list,
-                    correct_answers=correct_answers_list,
-                    explanation=question["explanation"],
-                    tip=question["tip"] if question["tip"] else None,
-                    tags=question["tags"],
-                    category=question["category"],
-                    difficulty=question["difficulty"]
+            logger.debug(self.game_logic.questions)
+            # Store questions in database
+            logger.debug(f"Storing questions in database")
+            question_ids = []
+            for q in self.game_logic.questions:
+                # Create question object
+                logger.debug(f"Creating question object")
+                question = Question(
+                    id=0,  # Will be set by database
+                    question=q['question'],
+                    description=q.get('description', ''),
+                    explanation=q.get('explanation', ''),
+                    category=q.get('category', 'general'),
+                    difficulty=q.get('difficulty', 'medium'),
+                    answers=[q[f'answer_{i}'] for i in range(1, 5) if q.get(f'answer_{i}')],
+                    correct_answers=[q[f'correct_answer_{i}_correct'] == 'true' 
+                                   for i in range(1, 5) if q.get(f'answer_{i}')]
                 )
                 
-                saved_question = self.question_repo.create(new_question)
-                logger.info(f"Created question: {saved_question.question}")
-                print(f"Question created successfully! ID: {saved_question.id}")
-                
-            elif choice == "6":
-                question_id = self.get_user_input("Enter question ID: ", str.isdigit)
-                if question_id:
-                    question = self.question_repo.get_by_id(int(question_id))
-                    if question:
-                        print(f"Question: {question.question}")
-                        print(f"Description: {question.description}")
-                        print(f"Category: {question.category}")
-                        print(f"Difficulty: {question.difficulty}")
-                        print(f"Tags: {', '.join(question.tags)}")
-                        print(f"Tip: {question.tip}")
-                        print(f"Explanation: {question.explanation}")
-                        print("Answers:")
-                        for letter, answer, correctness in zip("abcdef", question.answers, question.correct_answers):
-                            print(f"{letter}) {answer} ({'Correct' if correctness else 'Incorrect'})")
-                        print(question.correct_answers)
-                    else:
-                        print("Question not found")
+                # Save question
+                logger.debug(f"Saving question to database")
+                saved_question = self.question_repo.create_question(question)
+                question_ids.append(saved_question.id)
             
-            elif choice == "7":
-                print("Update Question")
-                print("Not implemented yet")
+            # Link questions to game
+            self.game_repo.add_game_questions(game.id, question_ids)
             
-            elif choice == "8":
-                print("Delete Question")
-                print("Not implemented yet")
-        
-        except RepositoryError as e:
-            logger.error(f"Repository error in game operations: {str(e)}")
-            print("An error occurred while processing your request")
-                
-    def handle_game_operations(self, choice: str):
-        """Handle game-related operations."""
-        try:
-            if choice == "9":
-                user_id = self.get_user_input("Enter user ID: ", str.isdigit)
-                if not user_id:
-                    return
-                    
-                user = self.user_repo.get_by_id(int(user_id))
-                if not user:
-                    print("User not found")
-                    return
-                    
-                # Get game settings
-                category = self.get_user_input("Enter category (or press Enter for any): ")
-                difficulty = self.get_user_input("Enter difficulty (easy/medium/hard): ")
-                
-                try:
-                    # Fetch questions from API
-                    questions = self.quiz_api.get_questions(
-                        category=category,
-                        difficulty=difficulty,
-                        limit=10
-                    )
-                    
-                    # Start game
-                    game = self.start_game(user, questions)
-                    if game:
-                        print(f"Game completed! Score: {game.score}/{game.rounds}")
-                        
-                except QuizAPIError as e:
-                    logger.error(f"Quiz API error: {str(e)}")
-                    print("Failed to fetch questions. Please try again later.")
-                    
-            elif choice == "10":
-                user_id = self.get_user_input("Enter user ID: ", str.isdigit)
-                if user_id:
-                    games = self.game_repo.get_by_user_id(int(user_id))
-                    if games:
-                        print("\nGame History:")
-                        for game in games:
-                            print(f"Game ID: {game.id}, Score: {game.score}/{game.rounds}, "
-                                  f"Date: {game.created_at}")
-                    else:
-                        print("No games found for this user")
-                        
-            elif choice == "11":
-                # Show top 10 scores
-                games = self.game_repo.get_top_scores(limit=10)
-                if games:
-                    print("\nLeaderboard:")
-                    for i, game in enumerate(games, 1):
-                        user = self.user_repo.get_by_id(game.user_id)
-                        print(f"{i}. {user.username}: {game.score} points "
-                              f"({game.score/game.rounds*100:.1f}%)")
-                else:
-                    print("No games found")
-                    
-            elif choice == "12":
-                game_id = self.get_user_input("Enter game ID: ", str.isdigit)
-                if game_id:
-                    if self.game_repo.delete(int(game_id)):
-                        print("Game deleted successfully!")
-                    else:
-                        print("Game not found")
-                        
-        except RepositoryError as e:
-            logger.error(f"Repository error in game operations: {str(e)}")
-            print("An error occurred while processing your request")
-            
-    def start_game(self, user, questions) -> Optional[Dict[str, Any]]:
-        """Run a game session."""
-        score = 0
-        total_questions = len(questions)
-        
-        for i, question in enumerate(questions, 1):
-            self.clear_screen()
-            print(f"\nQuestion {i}/{total_questions}")
-            print(f"\n{question['question']}")
-            
-            if question['description']:
-                print(f"\nDescription: {question['description']}")
-                
-            # Display answers
-            answers = question['answers']
-            for key, answer in answers.items():
-                if answer:
-                    print(f"\n{key[-1].upper()}) {answer}")
-                    
-            # Get user answer
-            while True:
-                answer = input("\nYour answer (A/B/C/D/E/F): ").upper()
-                if answer in 'ABCDEF':
-                    break
-                print("Invalid input. Please enter A, B, C, D, E, or F.")
-                
-            # Check answer
-            answer_key = f"answer_{answer.lower()}_correct"
-            if question['correct_answers'].get(answer_key) == "true":
-                score += 1
-                print("\nCorrect!")
-            else:
-                print("\nIncorrect!")
-                
-            if question['explanation']:
-                print(f"\nExplanation: {question['explanation']}")
-                
-            input("\nPress Enter to continue...")
-            
-        # Save game results
-        try:
-            game_data = {
-                "user_id": user.id,
-                "questions": [q['id'] for q in questions],
-                "rounds": total_questions,
-                "score": score
-            }
-            game = self.game_repo.create(game_data)
+            logger.info(f"Started new game {game.id} for user {user_id}")
             return game
-        except RepositoryError as e:
-            logger.error(f"Failed to save game results: {str(e)}")
-            print("Failed to save game results, but here's your score: "
-                  f"{score}/{total_questions}")
+            
+        except Exception as e:
+            logger.error(f"Failed to start game: {str(e)}")
             return None
-    
-    def run(self):
-        """Run the main application loop."""
-        if not self.initialize():
-            print("Failed to initialize application. Check the logs for details.")
-            return
-
-        while True:
+        
+    def answer_question(self, game_id: int, question_id: int, 
+                       answer_index: int) -> bool:
+        try:
+            # Get game and validate
+            game = self.game_repo.get_game(game_id)
+            if not game:
+                logger.error(f"Game {game_id} not found")
+                return False
+                
+            # Record answer
+            conn = self.db.get_connection()
             try:
-                self.print_menu()
-                choice = self.get_user_input("\nEnter your choice (1-13): ")
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        UPDATE game_questions 
+                        SET selected_answer_index = %s,
+                            answered_at = %s
+                        WHERE game_id = %s AND question_id = %s
+                        RETURNING id
+                    """, (answer_index, datetime.now(), game_id, question_id))
+                    conn.commit()
+                    return True
+            finally:
+                self.db.return_connection(conn)
                 
-                if not choice:
+        except Exception as e:
+            logger.error(f"Failed to record answer: {str(e)}")
+            return False
+        
+    def close(self):
+        try:
+            self.db.close_all_connections()
+            logger.info("Closed all database connections")
+        except Exception as e:
+            logger.error(f"Error closing connections: {str(e)}")
+            
+    def display_question(self, question: Question) -> None:
+        print("\n" + "="*50)
+        print(f"Question: {question.question}")
+        if question.description:
+            print(f"Description: {question.description}")
+        print("\nAnswers:")
+        for i, answer in enumerate(question.answers):
+            print(f"{i+1}. {answer}")
+            
+    def play_game(self, game_id: int) -> None:
+        try:
+            game = self.game_repo.get_game(game_id)
+            if not game:
+                logger.error("Game not found")
+                return
+
+            questions = self.game_repo.get_game_questions(game_id)
+            total_correct = 0
+
+            for i, game_question in enumerate(questions, 1):
+                question = self.question_repo.get_question_by_id(game_question.question_id)
+                if not question:
                     continue
-                    
-                if choice in ["1", "2", "3", "4"]:
-                    self.handle_user_operations(choice)
-                elif choice in ["5", "6", "7", "8"]:
-                    self.handle_question_operations(choice)
-                elif choice in ["9", "10", "11", "12"]:
-                    self.handle_game_operations(choice)
-                elif choice == "13":
-                    print("\nThank you for using the Quiz Game!")
-                    break
+
+                self.display_question(question)
+                
+                while True:
+                    try:
+                        answer = int(input("\nEnter your answer (1-4): "))
+                        if 1 <= answer <= len(question.answers):
+                            break
+                        print("Please enter a valid answer number")
+                    except ValueError:
+                        print("Please enter a number")
+
+                # Convert to 0-based index
+                answer_index = answer - 1
+                is_correct = question.correct_answers[answer_index]
+                
+                # Update game question
+                self.answer_question(game_id, question.id, answer_index)
+                
+                if is_correct:
+                    total_correct += 1
+                    print("\n✅ Correct!")
                 else:
-                    print("Invalid choice!")
+                    print("\n❌ Wrong!")
                 
-                input("\nPress Enter to continue...")
+                if question.explanation:
+                    print(f"Explanation: {question.explanation}")
                 
-            except Exception as e:
-                logger.error(f"Unexpected error: {str(e)}")
-                print("An unexpected error occurred. Please try again.")
-                input("\nPress Enter to continue...")
+                print(f"\nCurrent score: {total_correct}/{i}")
 
-        if self.session:
-            self.session.close()
+            # Update final score
+            self.update_game_score(game_id, total_correct)
+            print(f"\nGame Over! Final score: {total_correct}/{len(questions)}")
+
+        except Exception as e:
+            logger.error(f"Error during game play: {str(e)}")
+            
+    def update_game_score(self, game_id: int, score: int) -> bool:
+        conn = self.db.get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE games 
+                    SET score = %s
+                    WHERE id = %s
+                """, (score, game_id))
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Failed to update score: {str(e)}")
+            return False
+        finally:
+            self.db.return_connection(conn)
 def main():
-    menu = MenuManager()
-    menu.run()
-
+    app = QuizApplication("Nu4Q4o5IFPwgTUWcEmgWUpwyK06B3yGg3TbmkkTM")
+    try:
+        # Example usage
+        username = input("Enter your username: ")
+        user = app.register_user(username)
+        if user:
+            print(f"\nWelcome {username}!")
+            while True:
+                try:
+                    rounds = int(input("How many questions would you like? (1-10): "))
+                    if 1 <= rounds <= 10:
+                        break
+                    print("Please enter a number between 1 and 10")
+                except ValueError:
+                    print("Please enter a valid number")
+            game = app.start_game(user.id, rounds)
+            if game:
+                app.play_game(game.id)
+                play_again = input("\nWould you like to play again? (y/n): ")
+                if play_again.lower() != 'y':
+                    print("Thanks for playing!")
+    finally:
+        app.close()
+        
 if __name__ == '__main__':
     main()

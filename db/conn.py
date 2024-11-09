@@ -1,8 +1,8 @@
-import psycopg2
+from psycopg2 import pool
 
 class DatabaseConnection:
     def __init__(self):
-        self.connection_pool = psycopg2.pool.SimpleConnectionPool(
+        self.connection_pool = pool.SimpleConnectionPool(
             minconn=1,
             maxconn=10,
             database="fccpd",
