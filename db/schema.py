@@ -22,7 +22,7 @@ class Question(Base):
     question = Column(String(100), nullable=False)
     description = Column(String(100), nullable=False)
     answers = Column(ARRAY(String(100)))
-    multiple_correct_answers = Column(Boolean, nullable=False)
+    # multiple_correct_answers = Column(Boolean, nullable=False)
     correct_answers = Column(ARRAY(Boolean))
     explanation = Column(String(100), nullable=False)
     tip = Column(String(100), nullable=True)

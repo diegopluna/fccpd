@@ -18,7 +18,7 @@ class DatabaseConnection:
         try:
             self.engine = create_engine(self.DATABASE_URL, echo=True)
             Base.metadata.create_all(self.engine)
-            self.Session = sessionmaker(bind=self.engine)
+            self.Session = sessionmaker(bind=self.engine, expire_on_commit=False)
             
             print("Successfully connected to the database!")
             return True
