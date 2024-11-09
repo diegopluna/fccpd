@@ -57,6 +57,17 @@ class UserRepository(BaseRepository[User]):
                 return session.query(User).filter(User.username == username).first()
             except SQLAlchemyError as e:
                 raise RepositoryError(f"Failed to get user by username: {str(e)}", e)
+    
+    def update(self, user: User) -> Optional[User]:
+        with self.session_factory() as session:
+            try:
+                # `merge` retorna a instância atualizada que está na sessão
+                updated_user = session.merge(user)
+                session.commit()
+                return updated_user
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise RepositoryError(f"Failed to update user: {str(e)}", e)
 
 
 

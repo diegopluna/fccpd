@@ -112,7 +112,7 @@ class MenuManager:
                     user = self.user_repo.get_by_id(int(user_id))
                     if user:
                         print(f"User found: {user.username}")
-                        games = self.game_repo.get_by_user_id(user.id)
+                        games = self.game_repo.get_by_user(user)
                         print(f"Total games played: {len(games)}")
                     else:
                         print("User not found")
@@ -120,10 +120,11 @@ class MenuManager:
             elif choice == "3":
                 user_id = self.get_user_input("Enter user ID: ", str.isdigit)
                 if user_id:
-                    new_username = self.get_user_input("Enter new username: ")
-                    if new_username:
-                        user = self.user_repo.get_by_id(int(user_id))
-                        if user:
+                    user = self.user_repo.get_by_id(int(user_id))
+                    if user:
+                        print(f"User found: {user.username}")
+                        new_username = self.get_user_input("Enter new username: ")
+                        if new_username:
                             user.username = new_username
                             self.user_repo.update(user)
                             print("User updated successfully!")
@@ -133,12 +134,15 @@ class MenuManager:
             elif choice == "4":
                 user_id = self.get_user_input("Enter user ID: ", str.isdigit)
                 if user_id:
-                    confirm = input("Are you sure? This will delete all user data (y/n): ")
-                    if confirm.lower() == 'y':
-                        if self.user_repo.delete(int(user_id)):
-                            print("User deleted successfully!")
-                        else:
-                            print("User not found")
+                    user = self.user_repo.get_by_id(int(user_id))
+                    print(f"User found: {user.username}")
+                    if user:
+                        confirm = input("Are you sure? This will delete all user data (y/n): ")
+                        if confirm.lower() == 'y':
+                            if self.user_repo.delete(int(user_id)):
+                                print("User deleted successfully!")
+                            else:
+                                print("User not found")
                             
         except RepositoryError as e:
             logger.error(f"Repository error in user operations: {str(e)}")
@@ -292,7 +296,7 @@ class MenuManager:
                 elif choice in ["9", "10", "11", "12"]:
                     self.handle_game_operations(choice)
                 elif choice == "13":
-                    print("\nThank you for using the Quiz Game Management System!")
+                    print("\nThank you for using the Quiz Game!")
                     break
                 else:
                     print("Invalid choice!")
