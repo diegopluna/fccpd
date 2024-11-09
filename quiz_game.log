@@ -1,0 +1,238 @@
+2024-11-09 12:47:26,661 - INFO - select pg_catalog.version()
+2024-11-09 12:47:26,661 - INFO - [raw sql] {}
+2024-11-09 12:47:26,663 - INFO - select current_schema()
+2024-11-09 12:47:26,663 - INFO - [raw sql] {}
+2024-11-09 12:47:26,663 - INFO - show standard_conforming_strings
+2024-11-09 12:47:26,663 - INFO - [raw sql] {}
+2024-11-09 12:47:26,664 - INFO - BEGIN (implicit)
+2024-11-09 12:47:26,665 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:47:26,667 - INFO - [generated in 0.00104s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:47:26,669 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:47:26,669 - INFO - [cached since 0.003994s ago] {'table_name': 'questions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:47:26,670 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:47:26,670 - INFO - [cached since 0.005142s ago] {'table_name': 'games', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:47:26,672 - INFO - COMMIT
+2024-11-09 12:47:26,672 - ERROR - QUIZ_API_KEY environment variable not set
+2024-11-09 12:47:52,446 - INFO - select pg_catalog.version()
+2024-11-09 12:47:52,446 - INFO - [raw sql] {}
+2024-11-09 12:47:52,448 - INFO - select current_schema()
+2024-11-09 12:47:52,448 - INFO - [raw sql] {}
+2024-11-09 12:47:52,448 - INFO - show standard_conforming_strings
+2024-11-09 12:47:52,449 - INFO - [raw sql] {}
+2024-11-09 12:47:52,449 - INFO - BEGIN (implicit)
+2024-11-09 12:47:52,451 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:47:52,451 - INFO - [generated in 0.00055s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:47:52,453 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:47:52,454 - INFO - [cached since 0.003761s ago] {'table_name': 'questions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:47:52,455 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:47:52,456 - INFO - [cached since 0.005432s ago] {'table_name': 'games', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:47:52,457 - INFO - COMMIT
+2024-11-09 12:48:01,363 - ERROR - Unexpected error: '_GeneratorContextManager' object has no attribute 'query'
+2024-11-09 12:48:10,777 - ERROR - Unexpected error: '_GeneratorContextManager' object has no attribute 'add'
+2024-11-09 12:51:13,633 - INFO - select pg_catalog.version()
+2024-11-09 12:51:13,633 - INFO - [raw sql] {}
+2024-11-09 12:51:13,634 - INFO - select current_schema()
+2024-11-09 12:51:13,634 - INFO - [raw sql] {}
+2024-11-09 12:51:13,635 - INFO - show standard_conforming_strings
+2024-11-09 12:51:13,635 - INFO - [raw sql] {}
+2024-11-09 12:51:13,636 - INFO - BEGIN (implicit)
+2024-11-09 12:51:13,639 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:51:13,639 - INFO - [generated in 0.00076s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:51:13,642 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:51:13,642 - INFO - [cached since 0.003986s ago] {'table_name': 'questions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:51:13,643 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:51:13,644 - INFO - [cached since 0.005582s ago] {'table_name': 'games', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:51:13,645 - INFO - COMMIT
+2024-11-09 12:51:13,646 - ERROR - Initialization error: BaseRepository.__init__() missing 1 required positional argument: 'model'
+2024-11-09 12:51:45,760 - INFO - select pg_catalog.version()
+2024-11-09 12:51:45,761 - INFO - [raw sql] {}
+2024-11-09 12:51:45,761 - INFO - select current_schema()
+2024-11-09 12:51:45,761 - INFO - [raw sql] {}
+2024-11-09 12:51:45,763 - INFO - show standard_conforming_strings
+2024-11-09 12:51:45,763 - INFO - [raw sql] {}
+2024-11-09 12:51:45,763 - INFO - BEGIN (implicit)
+2024-11-09 12:51:45,767 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:51:45,767 - INFO - [generated in 0.00088s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:51:45,769 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:51:45,770 - INFO - [cached since 0.003578s ago] {'table_name': 'questions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:51:45,771 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:51:45,771 - INFO - [cached since 0.004721s ago] {'table_name': 'games', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:51:45,771 - INFO - COMMIT
+2024-11-09 12:51:48,585 - ERROR - Unexpected error: '_GeneratorContextManager' object has no attribute 'query'
+2024-11-09 12:53:11,860 - INFO - select pg_catalog.version()
+2024-11-09 12:53:11,860 - INFO - [raw sql] {}
+2024-11-09 12:53:11,861 - INFO - select current_schema()
+2024-11-09 12:53:11,862 - INFO - [raw sql] {}
+2024-11-09 12:53:11,862 - INFO - show standard_conforming_strings
+2024-11-09 12:53:11,862 - INFO - [raw sql] {}
+2024-11-09 12:53:11,863 - INFO - BEGIN (implicit)
+2024-11-09 12:53:11,864 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:53:11,865 - INFO - [generated in 0.00075s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:53:11,869 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:53:11,870 - INFO - [cached since 0.004746s ago] {'table_name': 'questions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:53:11,870 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 12:53:11,871 - INFO - [cached since 0.006591s ago] {'table_name': 'games', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 12:53:11,872 - INFO - COMMIT
+2024-11-09 12:53:15,822 - ERROR - Unexpected error: '_GeneratorContextManager' object has no attribute 'query'
+2024-11-09 13:01:23,829 - INFO - select pg_catalog.version()
+2024-11-09 13:01:23,829 - INFO - [raw sql] {}
+2024-11-09 13:01:23,830 - INFO - select current_schema()
+2024-11-09 13:01:23,830 - INFO - [raw sql] {}
+2024-11-09 13:01:23,831 - INFO - show standard_conforming_strings
+2024-11-09 13:01:23,831 - INFO - [raw sql] {}
+2024-11-09 13:01:23,831 - INFO - BEGIN (implicit)
+2024-11-09 13:01:23,833 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:01:23,834 - INFO - [generated in 0.00060s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:01:23,836 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:01:23,837 - INFO - [cached since 0.00363s ago] {'table_name': 'questions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:01:23,838 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:01:23,839 - INFO - [cached since 0.004946s ago] {'table_name': 'games', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:01:23,839 - INFO - COMMIT
+2024-11-09 13:01:28,335 - INFO - BEGIN (implicit)
+2024-11-09 13:01:28,336 - INFO - SELECT users.id AS users_id, users.username AS users_username 
+FROM users 
+WHERE users.id = %(id_1)s 
+ LIMIT %(param_1)s
+2024-11-09 13:01:28,336 - INFO - [generated in 0.00022s] {'id_1': 1, 'param_1': 1}
+2024-11-09 13:01:28,347 - INFO - COMMIT
+2024-11-09 13:01:28,348 - ERROR - Unexpected error: Instance <User at 0x22a32d441a0> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2024-11-09 13:01:56,803 - ERROR - Repository error in user operations: Create operation failed: Class 'builtins.dict' is not mapped
+2024-11-09 13:01:56,804 - ERROR - Original error: None
+2024-11-09 13:04:42,351 - INFO - select pg_catalog.version()
+2024-11-09 13:04:42,352 - INFO - [raw sql] {}
+2024-11-09 13:04:42,352 - INFO - select current_schema()
+2024-11-09 13:04:42,352 - INFO - [raw sql] {}
+2024-11-09 13:04:42,352 - INFO - show standard_conforming_strings
+2024-11-09 13:04:42,353 - INFO - [raw sql] {}
+2024-11-09 13:04:42,353 - INFO - BEGIN (implicit)
+2024-11-09 13:04:42,356 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:04:42,357 - INFO - [generated in 0.00116s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:04:42,359 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:04:42,359 - INFO - [cached since 0.003839s ago] {'table_name': 'questions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:04:42,360 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:04:42,361 - INFO - [cached since 0.005155s ago] {'table_name': 'games', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:04:42,362 - INFO - COMMIT
+2024-11-09 13:04:45,007 - ERROR - Repository error in user operations: Create operation failed: Class 'builtins.dict' is not mapped
+2024-11-09 13:04:45,007 - ERROR - Original error: None
+2024-11-09 13:05:44,966 - INFO - select pg_catalog.version()
+2024-11-09 13:05:44,966 - INFO - [raw sql] {}
+2024-11-09 13:05:44,967 - INFO - select current_schema()
+2024-11-09 13:05:44,967 - INFO - [raw sql] {}
+2024-11-09 13:05:44,967 - INFO - show standard_conforming_strings
+2024-11-09 13:05:44,967 - INFO - [raw sql] {}
+2024-11-09 13:05:44,968 - INFO - BEGIN (implicit)
+2024-11-09 13:05:44,970 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:05:44,970 - INFO - [generated in 0.00086s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:05:44,973 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:05:44,973 - INFO - [cached since 0.003622s ago] {'table_name': 'questions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:05:44,974 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:05:44,974 - INFO - [cached since 0.004867s ago] {'table_name': 'games', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:05:44,975 - INFO - COMMIT
+2024-11-09 13:05:47,180 - ERROR - Repository error in user operations: Create operation failed: Class 'sqlalchemy.orm.decl_api.DeclarativeMeta' is not mapped; was a class (db.schema.User) supplied where an instance was required?
+2024-11-09 13:05:47,181 - ERROR - Original error: None
+2024-11-09 13:06:51,536 - INFO - select pg_catalog.version()
+2024-11-09 13:06:51,537 - INFO - [raw sql] {}
+2024-11-09 13:06:51,537 - INFO - select current_schema()
+2024-11-09 13:06:51,537 - INFO - [raw sql] {}
+2024-11-09 13:06:51,538 - INFO - show standard_conforming_strings
+2024-11-09 13:06:51,538 - INFO - [raw sql] {}
+2024-11-09 13:06:51,539 - INFO - BEGIN (implicit)
+2024-11-09 13:06:51,541 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:06:51,542 - INFO - [generated in 0.00070s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:06:51,545 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:06:51,545 - INFO - [cached since 0.004084s ago] {'table_name': 'questions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:06:51,547 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:06:51,547 - INFO - [cached since 0.005895s ago] {'table_name': 'games', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:06:51,548 - INFO - COMMIT
+2024-11-09 13:06:53,173 - INFO - BEGIN (implicit)
+2024-11-09 13:06:53,175 - INFO - INSERT INTO users (username) VALUES (%(username)s) RETURNING users.id
+2024-11-09 13:06:53,175 - INFO - [generated in 0.00028s] {'username': 'teste'}
+2024-11-09 13:06:53,180 - INFO - COMMIT
+2024-11-09 13:06:53,181 - INFO - Created user: teste
+2024-11-09 13:06:53,181 - ERROR - Unexpected error: Instance <User at 0x135a9006630> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2024-11-09 13:07:43,686 - INFO - select pg_catalog.version()
+2024-11-09 13:07:43,687 - INFO - [raw sql] {}
+2024-11-09 13:07:43,688 - INFO - select current_schema()
+2024-11-09 13:07:43,688 - INFO - [raw sql] {}
+2024-11-09 13:07:43,688 - INFO - show standard_conforming_strings
+2024-11-09 13:07:43,688 - INFO - [raw sql] {}
+2024-11-09 13:07:43,689 - INFO - BEGIN (implicit)
+2024-11-09 13:07:43,691 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:07:43,691 - INFO - [generated in 0.00052s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:07:43,694 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:07:43,694 - INFO - [cached since 0.003307s ago] {'table_name': 'questions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:07:43,695 - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2024-11-09 13:07:43,695 - INFO - [cached since 0.004545s ago] {'table_name': 'games', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2024-11-09 13:07:43,696 - INFO - COMMIT
+2024-11-09 13:07:46,220 - INFO - BEGIN (implicit)
+2024-11-09 13:07:46,221 - INFO - INSERT INTO users (username) VALUES (%(username)s) RETURNING users.id
+2024-11-09 13:07:46,221 - INFO - [generated in 0.00025s] {'username': 'sdadsa'}
+2024-11-09 13:07:46,223 - INFO - COMMIT
+2024-11-09 13:07:46,224 - INFO - BEGIN (implicit)
+2024-11-09 13:07:46,225 - INFO - SELECT users.id, users.username 
+FROM users 
+WHERE users.id = %(pk_1)s
+2024-11-09 13:07:46,225 - INFO - [generated in 0.00046s] {'pk_1': 3}
+2024-11-09 13:07:46,227 - INFO - COMMIT
+2024-11-09 13:07:46,227 - INFO - Created user: sdadsa
+2024-11-09 13:07:46,227 - ERROR - Unexpected error: Instance <User at 0x1ee6237eb70> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
