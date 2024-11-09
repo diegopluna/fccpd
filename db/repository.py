@@ -1,6 +1,8 @@
 from .conn import DatabaseConnection
 from .schema import Question, Game, User, GameQuestion
 from typing import List, Optional
+from datetime import datetime
+import json
 
 class UserRepository:
     def __init__(self, db_connection: DatabaseConnection):
@@ -43,6 +45,8 @@ class QuestionRepository:
         try:
             print("Creating question")
             with conn.cursor() as cur:
+                answers_json = json.dumps(question.answers)
+                correct_answers_json = json.dumps(question.correct_answers)
                 cur.execute("""
                     INSERT INTO questions (
                         question, description, explanation, 
@@ -56,8 +60,8 @@ class QuestionRepository:
                     question.explanation,
                     question.category,
                     question.difficulty,
-                    question.answers,
-                    question.correct_answers
+                    answers_json,
+                    correct_answers_json
                 ))
                 print("Question created")
                 question_id = cur.fetchone()[0]
@@ -88,6 +92,55 @@ class QuestionRepository:
                 return None
         finally:
             self.db.return_connection(conn)
+            
+    def check_answer(self, question_id: int, selected_answer_key: str) -> bool:
+        conn = self.db.get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT correct_answers 
+                    FROM questions 
+                    WHERE id = %s
+                """, (question_id,))
+                result = cur.fetchone()
+                if not result:
+                    return False
+                    
+                correct_answers = json.loads(result[0])
+                correct_key = f"correct_{selected_answer_key}_correct"
+                return correct_answers.get(correct_key, False)
+        finally:
+            self.db.return_connection(conn)
+            
+    def answer_question(self, game_id: int, question_id: int, answer_key: str) -> bool:
+        try:
+            # Get game and validate
+            game = self.game_repo.get_game(game_id)
+            if not game:
+                return False
+                
+            # Get correct answer
+            is_correct = self.check_answer(question_id, answer_key)
+            
+            # Record answer
+            conn = self.db.get_connection()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        UPDATE game_questions 
+                        SET selected_answer_key = %s,
+                            is_correct = %s,
+                            answered_at = %s
+                        WHERE game_id = %s AND question_id = %s
+                        RETURNING id
+                    """, (answer_key, is_correct, datetime.now(), game_id, question_id))
+                    conn.commit()
+                    return True
+            finally:
+                self.db.return_connection(conn)
+                
+        except Exception as e:
+            return False
             
 class GameRepository:
     def __init__(self, db_connection: DatabaseConnection):
@@ -155,7 +208,7 @@ class GameRepository:
         try:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT id, game_id, question_id, selected_answer_index, 
+                    SELECT id, game_id, question_id, selected_answer_key, 
                            is_correct, answered_at
                     FROM game_questions 
                     WHERE game_id = %s
@@ -165,7 +218,7 @@ class GameRepository:
                         id=row[0],
                         game_id=row[1],
                         question_id=row[2],
-                        selected_answer_index=row[3],
+                        selected_answer_key=row[3],
                         is_correct=row[4],
                         answered_at=row[5]
                     )

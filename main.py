@@ -146,17 +146,25 @@ class QuizApplication:
                         print("Please enter a number")
 
                 # Convert to 0-based index
-                answer_index = answer - 1
-                is_correct = question.correct_answers[answer_index]
+                answer_key = f"answer_{answer}"
+                correct_key = f"correct_answer_{answer}_correct"
+                is_correct = question.correct_answers.get(correct_key, False)
                 
                 # Update game question
-                self.answer_question(game_id, question.id, answer_index)
+                self.answer_question(game_id, question.id, answer_key)
                 
                 if is_correct:
                     total_correct += 1
                     print("\n✅ Correct!")
                 else:
                     print("\n❌ Wrong!")
+                    correct_answers = [k for k, v in question.correct_answers.items() 
+                                if v and k.startswith("correct_answer_")]
+                    if correct_answers:
+                        correct_num = correct_answers[0].split("_")[2]
+                        correct_text = question.answers[f"answer_{correct_num}"]
+                        print(f"The correct answer was: {correct_text}")
+                    
                 
                 if question.explanation:
                     print(f"Explanation: {question.explanation}")

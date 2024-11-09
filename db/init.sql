@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS questions (
     explanation VARCHAR(255),
     category VARCHAR(255) NOT NULL,
     difficulty VARCHAR(255) NOT NULL,
-    answers VARCHAR(255)[] NOT NULL,
-    correct_answers BOOLEAN[] NOT NULL
+    answers jsonb NOT NULL,
+    correct_answers jsonb NOT NULL
 );
 
 -- Create games table
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS game_questions (
     id SERIAL PRIMARY KEY,
     game_id INTEGER NOT NULL REFERENCES games(id),
     question_id INTEGER NOT NULL REFERENCES questions(id),
-    selected_answer_index INTEGER,
+    selected_answer_key VARCHAR(50),
     is_correct BOOLEAN,
     answered_at TIMESTAMP,
     UNIQUE(game_id, question_id)

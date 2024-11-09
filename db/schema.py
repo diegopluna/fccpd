@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import datetime
 
 
@@ -16,8 +16,8 @@ class Question:
     explanation: str
     category: str
     difficulty: str
-    answers: List[str]
-    correct_answers: List[bool]
+    answers: Dict[str, str]
+    correct_answers: Dict[str,bool]
     
 @dataclass
 class Game:
@@ -32,6 +32,6 @@ class GameQuestion:
     id: int
     game_id: int
     question_id: int
-    selected_answer_index: Optional[int]
+    selected_answer_key: Optional[str]
     is_correct: Optional[bool]
     answered_at: Optional[datetime]
