@@ -1,5 +1,4 @@
-from typing import List, Dict
-import random
+from typing import Dict
 from .quiz_api import QuizAPI
 
 class QuizGame:
