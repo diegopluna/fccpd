@@ -18,6 +18,9 @@ class QuizGame:
             difficulty=difficulty,
             limit=num_questions
         )
+
+        # print(f"DEBUG: {self.questions}")
+
         print("Questions fetched")
         self.total_questions = len(self.questions)
         self.current_question = 0

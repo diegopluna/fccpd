@@ -25,11 +25,14 @@ class QuizApplication:
             else:
                 user = self.user_repo.get_user_by_username(username)
                 if user:
+                    print(f"Welcome back, {username}!")
                     return user
                 else:
                     print("User not found, would you like to register?")
                     register = input("(y/n): ")
                     if register.lower() == 'y':
+                        print(f"Registering new user: {username}")
+                        print(f"Welcome, {username}!")
                         return self.register_user(username)
                     else:
                         break
@@ -67,15 +70,15 @@ class QuizApplication:
                 logger.debug(f"Creating question object")
                 question = Question(
                     id=0,  # Will be set by database
-                    question=q['question'],
+                    question=q.get('question', ''),
                     description=q.get('description', ''),
                     explanation=q.get('explanation', ''),
                     category=q.get('category', 'general'),
                     difficulty=q.get('difficulty', 'medium'),
-                    answers=[q[f'answer_{i}'] for i in range(1, 5) if q.get(f'answer_{i}')],
-                    correct_answers=[q[f'correct_answer_{i}_correct'] == 'true' 
-                                   for i in range(1, 5) if q.get(f'answer_{i}')]
+                    answers=[q['answers'].get(f'answer_{l}', '') for l in "abcdef" if q['answers'].get(f'answer_{l}') is not None],
+                    correct_answers=[q['correct_answers'].get(f'answer_{l}_correct', 'false') == 'true' for l in "abcdef"]
                 )
+                print(question)
                 
                 # Save question
                 logger.debug(f"Saving question to database")
@@ -136,7 +139,7 @@ class QuizApplication:
         print("\nAnswers:")
         for i, answer in enumerate(question.answers):
             print(f"{i+1}. {answer}")
-        print(question.answers)
+        print(question.correct_answers)
             
     def play_game(self, game_id: int) -> None:
         try:
@@ -154,11 +157,13 @@ class QuizApplication:
                     continue
 
                 self.display_question(question)
+
+                answers_num = len(question.answers)
                 
                 while True:
                     try:
-                        answer = int(input("\nEnter your answer (1-4): "))
-                        if 1 <= answer <= len(question.answers):
+                        answer = int(input(f"\nEnter your answer (1-{answers_num}): "))
+                        if 1 <= answer <= answers_num:
                             break
                         print("Please enter a valid answer number")
                     except ValueError:
@@ -218,8 +223,9 @@ def main():
     try:
         # Example usage
         user = app.log_user()
-        if user is not None:
-            print(f"\nWelcome {user.username}!")
+        if user is None:
+            print("Goodbye!")
+        else:
             while True:
                 try:
                     rounds = int(input("How many questions would you like? (1-10): "))
