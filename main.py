@@ -16,31 +16,327 @@ class QuizApplication:
         self.game_repo = GameRepository(self.db)
         self.question_repo = QuestionRepository(self.db)
         self.game_logic = QuizGame(api_key)
+        self.current_user = None
 
     def clear_screen(self):
         print("\033[H\033[J")
     
     def press_to_continue(self):
         input("Press Enter to continue...")
-        print("\033[H\033[J")
+        self.clear_screen()
 
     def main_menu(self):
+        while True:
+            self.clear_screen()
+            print("Welcome to the Quiz Game!")
+            print("1. Login")
+            print("2. Register")
+            print("3. View Statistics Dashboard")
+            print("4. Manage database")
+            print("5. Exit")
+            
+            choice = input("Enter your choice: ")
+            
+            if choice == '1':
+                if self.login():
+                    self.game_menu()
+            elif choice == '2':
+                if self.register():
+                    self.game_menu()
+            elif choice == '3':
+                self.view_statistics_dashboard()
+            elif choice == '4':
+                self.db_menu()
+            elif choice == '5':
+                print("Goodbye!")
+                break
+            else:
+                print("Invalid choice")
+                self.press_to_continue()
+
+    def login(self) -> bool:
         self.clear_screen()
-        print("Welcome to the Quiz Game!")
-        print("1. Login or register")
-        print("2. Manage database")
-        print("3. Exit")
-        choice = input("Enter your choice: ")
-        if choice == '1':
-            self.start_game()
-        elif choice == '2':
-            self.db_menu()
-        elif choice == '3':
-            print("Goodbye!")
-        else:
-            print("Invalid choice")
+        print("=== Login ===")
+        username = input("Enter your username: ")
+        
+        if not username:
+            print("Username cannot be empty")
             self.press_to_continue()
-            self.main_menu()
+            return False
+            
+        user = self.user_repo.get_user_by_username(username)
+        if user:
+            print(f"Welcome back, {username}!")
+            self.current_user = user
+            self.press_to_continue()
+            return True
+        else:
+            print("User not found")
+            self.press_to_continue()
+            return False
+
+    def register(self) -> bool:
+        self.clear_screen()
+        print("=== Register ===")
+        while True:
+            username = input("Enter desired username: ")
+            
+            if not username:
+                print("Username cannot be empty")
+                continue
+                
+            existing_user = self.user_repo.get_user_by_username(username)
+            if existing_user:
+                print("Username already exists")
+                retry = input("Would you like to try another username? (y/n): ")
+                if retry.lower() != 'y':
+                    return False
+            else:
+                try:
+                    user = self.user_repo.create_user(username)
+                    if user:
+                        print(f"Registration successful! Welcome, {username}!")
+                        self.current_user = user
+                        self.press_to_continue()
+                        return True
+                    else:
+                        print("Registration failed")
+                        self.press_to_continue()
+                        return False
+                except Exception as e:
+                    print(f"Error during registration: {str(e)}")
+                    self.press_to_continue()
+                    return False
+
+    def game_menu(self):
+        while True:
+            self.clear_screen()
+            print(f"=== Game Menu ===")
+            print(f"Logged in as: {self.current_user.username}")
+            print("1. Start New Game")
+            print("2. View Game History")
+            print("3. Logout")
+            
+            choice = input("Enter your choice: ")
+            
+            if choice == '1':
+                self.start_new_game()
+            elif choice == '2':
+                self.view_game_history()
+            elif choice == '3':
+                self.current_user = None
+                print("Logged out successfully")
+                self.press_to_continue()
+                break
+            else:
+                print("Invalid choice")
+                self.press_to_continue()
+
+    def start_new_game(self):
+        while True:
+            try:
+                rounds = int(input("How many questions would you like? (1-10): "))
+                if 1 <= rounds <= 10:
+                    game = self.start_game(self.current_user.id, rounds)
+                    if game:
+                        self.play_game(game.id)
+                        play_again = input("\nWould you like to play again? (y/n): ")
+                        if play_again.lower() != 'y':
+                            break
+                    else:
+                        print("Failed to start game")
+                        self.press_to_continue()
+                        break
+                else:
+                    print("Please enter a number between 1 and 10")
+            except ValueError:
+                print("Please enter a valid number")
+                
+    def view_statistics_dashboard(self):
+        self.clear_screen()
+        print("=== Quiz Statistics Dashboard ===\n")
+        
+        conn = self.db.get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT 
+                        u.username,
+                        COUNT(DISTINCT g.id) as total_games,
+                        COALESCE(SUM(g.score), 0)::integer as total_correct,
+                        COALESCE(SUM(g.rounds), 0)::integer as total_questions,
+                        ROUND(CAST(
+                            CASE 
+                                WHEN SUM(g.rounds) > 0 
+                                THEN (100.0 * SUM(g.score)::numeric / SUM(g.rounds)::numeric)
+                                ELSE 0 
+                            END AS numeric
+                        ), 2) as accuracy
+                    FROM users u
+                    LEFT JOIN games g ON u.id = g.user_id
+                    GROUP BY u.id, u.username
+                    ORDER BY accuracy DESC
+                    LIMIT 5
+                """)
+                top_players = cur.fetchall()
+                
+                cur.execute("""
+                    SELECT 
+                        q.category,
+                        COUNT(DISTINCT q.id) as total_questions,
+                        COUNT(DISTINCT gq.game_id) as times_played,
+                        ROUND(CAST(
+                            CASE 
+                                WHEN COUNT(gq.id) > 0 
+                                THEN 100.0 * COUNT(CASE WHEN gq.is_correct THEN 1 END)::numeric / COUNT(gq.id)::numeric
+                                ELSE 0 
+                            END AS numeric
+                        ), 2) as success_rate
+                    FROM questions q
+                    LEFT JOIN game_questions gq ON q.id = gq.question_id
+                    GROUP BY q.category
+                    ORDER BY success_rate DESC
+                """)
+                category_stats = cur.fetchall()
+                
+                cur.execute("""
+                    SELECT 
+                        q.difficulty,
+                        COUNT(DISTINCT q.id) as question_count,
+                        ROUND(CAST(
+                            CASE 
+                                WHEN COUNT(gq.id) > 0 
+                                THEN 100.0 * COUNT(CASE WHEN gq.is_correct THEN 1 END)::numeric / COUNT(gq.id)::numeric
+                                ELSE 0 
+                            END AS numeric
+                        ), 2) as success_rate
+                    FROM questions q
+                    LEFT JOIN game_questions gq ON q.id = gq.question_id
+                    GROUP BY q.difficulty
+                    ORDER BY success_rate DESC
+                """)
+                difficulty_stats = cur.fetchall()
+                
+                cur.execute("""
+                    SELECT 
+                        u.username,
+                        g.created_at,
+                        g.score,
+                        g.rounds,
+                        ROUND(CAST(
+                            CASE 
+                                WHEN g.rounds > 0 
+                                THEN 100.0 * g.score::numeric / g.rounds::numeric
+                                ELSE 0 
+                            END AS numeric
+                        ), 2) as performance
+                    FROM games g
+                    JOIN users u ON g.user_id = u.id
+                    ORDER BY g.created_at DESC
+                    LIMIT 5
+                """)
+                recent_activity = cur.fetchall()
+                
+                cur.execute("""
+                    SELECT 
+                        q.question,
+                        q.category,
+                        q.difficulty,
+                        COUNT(gq.id) as attempts,
+                        ROUND(CAST(
+                            CASE 
+                                WHEN COUNT(gq.id) > 0 
+                                THEN 100.0 * COUNT(CASE WHEN gq.is_correct THEN 1 END)::numeric / COUNT(gq.id)::numeric
+                                ELSE 0 
+                            END AS numeric
+                        ), 2) as success_rate
+                    FROM questions q
+                    LEFT JOIN game_questions gq ON q.id = gq.question_id
+                    GROUP BY q.id, q.question, q.category, q.difficulty
+                    HAVING COUNT(gq.id) > 0
+                    ORDER BY success_rate ASC
+                    LIMIT 5
+                """)
+                challenging_questions = cur.fetchall()
+
+                print("\n🏆 Top Players")
+                print("-" * 80)
+                print(f"{'Username':<20} {'Games':<10} {'Questions':<10} {'Correct':<10} {'Accuracy':<10}")
+                print("-" * 80)
+                if top_players:
+                    for player in top_players:
+                        print(f"{player[0]:<20} {player[1]:<10} {player[3]:<10} {player[2]:<10} {player[4]}%")
+                else:
+                    print("No games played yet")
+
+                print("\n📊 Category Performance")
+                print("-" * 80)
+                print(f"{'Category':<20} {'Questions':<10} {'Times Played':<15} {'Success Rate':<10}")
+                print("-" * 80)
+                if category_stats:
+                    for cat in category_stats:
+                        success_rate = cat[3] if cat[3] is not None else 0
+                        print(f"{cat[0]:<20} {cat[1]:<10} {cat[2]:<15} {success_rate}%")
+                else:
+                    print("No category statistics available")
+
+                print("\n📈 Difficulty Level Analysis")
+                print("-" * 60)
+                print(f"{'Difficulty':<15} {'Questions':<10} {'Success Rate':<10}")
+                print("-" * 60)
+                if difficulty_stats:
+                    for diff in difficulty_stats:
+                        success_rate = diff[2] if diff[2] is not None else 0
+                        print(f"{diff[0]:<15} {diff[1]:<10} {success_rate}%")
+                else:
+                    print("No difficulty statistics available")
+
+                print("\n🕒 Recent Activity")
+                print("-" * 80)
+                print(f"{'Username':<15} {'Date':<20} {'Score':<10} {'Total':<10} {'Performance':<10}")
+                print("-" * 80)
+                if recent_activity:
+                    for activity in recent_activity:
+                        date = activity[1].strftime("%Y-%m-%d %H:%M")
+                        performance = activity[4] if activity[4] is not None else 0
+                        print(f"{activity[0]:<15} {date:<20} {activity[2]:<10} {activity[3]:<10} {performance}%")
+                else:
+                    print("No recent activity")
+
+                print("\n⚠️ Most Challenging Questions")
+                print("-" * 100)
+                print(f"{'Question':<40} {'Category':<15} {'Difficulty':<10} {'Attempts':<10} {'Success Rate':<10}")
+                print("-" * 100)
+                if challenging_questions:
+                    for question in challenging_questions:
+                        q_text = question[0][:37] + '...' if len(question[0]) > 37 else question[0]
+                        success_rate = question[4] if question[4] is not None else 0
+                        print(f"{q_text:<40} {question[1]:<15} {question[2]:<10} {question[3]:<10} {success_rate}%")
+                else:
+                    print("No challenging questions data available")
+
+        except Exception as e:
+            print(f"Error retrieving statistics: {str(e)}")
+            logger.error(f"Error in statistics dashboard: {e}", exc_info=True)
+        finally:
+            self.db.return_connection(conn)
+        
+        self.press_to_continue()
+
+    def view_game_history(self):
+        self.clear_screen()
+        print("=== Game History ===")
+        games = self.game_repo.get_all_games()
+        
+        if not games:
+            print("No games played yet")
+        else:
+            for game in games:
+                if game.user_id == self.current_user.id:
+                    print(f"Game {game.id}: Score: {game.score}/{game.rounds} - Played on: {game.created_at}")
+        
+        self.press_to_continue()
+
 
     def db_menu(self):
         self.clear_screen()
@@ -524,33 +820,14 @@ class QuizApplication:
             return False
         finally:
             self.db.return_connection(conn)
+
+        
 def main():
     app = QuizApplication("Nu4Q4o5IFPwgTUWcEmgWUpwyK06B3yGg3TbmkkTM")
     try:
         app.main_menu()
-
-        user = app.log_user()
-        if user is None:
-            print("Goodbye!")
-        else:
-            while True:
-                while True:
-                    try:
-                        rounds = int(input("How many questions would you like? (1-10): "))
-                        if 1 <= rounds <= 10:
-                            break
-                        print("Please enter a number between 1 and 10")
-                    except ValueError:
-                        print("Please enter a valid number")
-                game = app.start_game(user.id, rounds)
-                if game:
-                    app.play_game(game.id)
-                    play_again = input("\nWould you like to play again? (y/n): ")
-                    if play_again.lower() != 'y':
-                        print("Thanks for playing!")
-                        break
     finally:
         app.close()
-        
+
 if __name__ == '__main__':
     main()

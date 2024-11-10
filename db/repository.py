@@ -275,10 +275,9 @@ class GameRepository:
         try:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT g.id, u.username, g.rounds, g.score, g.created_at 
-                    FROM games AS g
-                    JOIN users AS u ON g.user_id = u.id
-                    ORDER BY g.created_at DESC
+                    SELECT id, user_id, rounds, score, created_at 
+                    FROM games
+                    ORDER BY created_at DESC
                 """)
                 return [
                     Game(
