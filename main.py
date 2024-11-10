@@ -221,19 +221,21 @@ def main():
             print("Goodbye!")
         else:
             while True:
-                try:
-                    rounds = int(input("How many questions would you like? (1-10): "))
-                    if 1 <= rounds <= 10:
+                while True:
+                    try:
+                        rounds = int(input("How many questions would you like? (1-10): "))
+                        if 1 <= rounds <= 10:
+                            break
+                        print("Please enter a number between 1 and 10")
+                    except ValueError:
+                        print("Please enter a valid number")
+                game = app.start_game(user.id, rounds)
+                if game:
+                    app.play_game(game.id)
+                    play_again = input("\nWould you like to play again? (y/n): ")
+                    if play_again.lower() != 'y':
+                        print("Thanks for playing!")
                         break
-                    print("Please enter a number between 1 and 10")
-                except ValueError:
-                    print("Please enter a valid number")
-            game = app.start_game(user.id, rounds)
-            if game:
-                app.play_game(game.id)
-                play_again = input("\nWould you like to play again? (y/n): ")
-                if play_again.lower() != 'y':
-                    print("Thanks for playing!")
     finally:
         app.close()
         
