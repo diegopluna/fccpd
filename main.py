@@ -162,33 +162,27 @@ class QuizApplication:
                 
                 while True:
                     try:
-                        answer = int(input(f"\nEnter your answer (1-{answers_num}): "))
-                        if 1 <= answer <= answers_num:
+                        answer = int(input(f"\nEnter your answer (1-{answers_num}): ")) - 1 #0 indexing the answer
+                        if 0 <= answer <= answers_num - 1:
                             break
                         print("Please enter a valid answer number")
                     except ValueError:
                         print("Please enter a number")
 
-                # Convert to 0-based index
-                answer_key = f"answer_{answer}"
-                correct_key = f"correct_answer_{answer}_correct"
-                is_correct = question.correct_answers.get(correct_key, False)
+                is_correct = question.correct_answers[answer]
                 
                 # Update game question
-                self.answer_question(game_id, question.id, answer_key)
+                self.answer_question(game_id, question.id, answer)
                 
                 if is_correct:
                     total_correct += 1
                     print("\n✅ Correct!")
                 else:
                     print("\n❌ Wrong!")
-                    correct_answers = [k for k, v in question.correct_answers.items() 
-                                if v and k.startswith("correct_answer_")]
-                    if correct_answers:
-                        correct_num = correct_answers[0].split("_")[2]
-                        correct_text = question.answers[f"answer_{correct_num}"]
-                        print(f"The correct answer was: {correct_text}")
-                    
+                    print(f"The correct answer(s) was(were):")
+                    for idx in range(answers_num):
+                        if question.correct_answers[idx]:
+                            print(f"{idx+1}. {question.answers[idx]}")
                 
                 if question.explanation:
                     print(f"Explanation: {question.explanation}")
