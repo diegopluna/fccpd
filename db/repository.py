@@ -25,6 +25,18 @@ class UserRepository:
             raise e
         finally:
             self.db.return_connection(conn)
+
+    def get_all_users(self) -> List[User]:
+        conn = self.db.get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id, username FROM users")
+                return [
+                    User(id=row[0], username=row[1])
+                    for row in cur.fetchall()
+                ]
+        finally:
+            self.db.return_connection(conn)
     
     def get_user_by_id(self, user_id: int) -> Optional[User]:
         conn = self.db.get_connection()
@@ -102,35 +114,56 @@ class QuestionRepository:
                 return None
         finally:
             self.db.return_connection(conn)
-            
-    def check_answer(self, question_id: int, selected_answer_index: int) -> bool:
+    
+    def get_all_questions(self) -> List[Question]:
         conn = self.db.get_connection()
         try:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT correct_answers 
-                    FROM questions 
+                    SELECT id, question, description, explanation, category, difficulty, answers, correct_answers
+                    FROM questions
+                """)
+                return [Question(*row) for row in cur.fetchall()]
+        finally:
+            self.db.return_connection(conn)
+    
+    def update_question(self, question: Question) -> Optional[Question]:
+        conn = self.db.get_connection()
+        try:
+            with conn.cursor() as cur:
+                answers_json = json.dumps(question.answers)
+                correct_answers_json = json.dumps(question.correct_answers)
+                cur.execute("""
+                    UPDATE questions
+                    SET question = %s, description = %s, explanation = %s, 
+                        category = %s, difficulty = %s, answers = %s, correct_answers = %s
                     WHERE id = %s
-                """, (question_id,))
-                result = cur.fetchone()
-                if not result:
-                    return False
-                    
-                correct_answers = json.loads(result[0])
-                correct_key = f"correct_{selected_answer_index}_correct"
-                return correct_answers.get(correct_key, False)
+                    RETURNING id
+                """, (
+                    question.question,
+                    question.description,
+                    question.explanation,
+                    question.category,
+                    question.difficulty,
+                    answers_json,
+                    correct_answers_json,
+                    question.id
+                ))
+                conn.commit()
+                return question
+        except Exception as e:
+            conn.rollback()
+            raise e
         finally:
             self.db.return_connection(conn)
             
-    def answer_question(self, game_id: int, question_id: int, answer_index: int) -> bool:
+    def answer_question(self, game_id: int, question_id: int, answer_index: int, is_correct: bool) -> bool:
         try:
             # Get game and validate
             game = self.game_repo.get_game(game_id)
-            if not game:
+            question = self.get_question_by_id(question_id)
+            if not game or not question:
                 return False
-                
-            # Get correct answer
-            is_correct = self.check_answer(question_id, answer_index)
             
             # Record answer
             conn = self.db.get_connection()
@@ -210,6 +243,71 @@ class GameRepository:
                         created_at=result[4]
                     )
                 return None
+        finally:
+            self.db.return_connection(conn)
+
+    def get_game_by_id(self, game_id: int) -> Optional[Game]:
+        conn = self.db.get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT g.id, u.username, g.rounds, g.score, g.created_at 
+                    FROM games AS g
+                    JOIN users AS u ON g.user_id = u.id
+                    WHERE g.id = %s
+                    ORDER BY g.created_at DESC
+                """, (game_id,))
+                result = cur.fetchone()
+                if result:
+                    return Game(
+                        id=result[0],
+                        user_id=result[1],
+                        rounds=result[2],
+                        score=result[3],
+                        created_at=result[4]
+                    )
+                return None
+        finally:
+            self.db.return_connection(conn)
+
+    def get_all_games(self) -> List[Game]:
+        conn = self.db.get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT g.id, u.username, g.rounds, g.score, g.created_at 
+                    FROM games AS g
+                    JOIN users AS u ON g.user_id = u.id
+                    ORDER BY g.created_at DESC
+                """)
+                return [
+                    Game(
+                        id=row[0],
+                        user_id=row[1],
+                        rounds=row[2],
+                        score=row[3],
+                        created_at=row[4]
+                    )
+                    for row in cur.fetchall()
+                ]
+        finally:
+            self.db.return_connection(conn)
+    
+    def delete_game(self, game_id: int) -> bool:
+        conn = self.db.get_connection()
+        try:
+            with conn.cursor() as cur:
+                # Delete entries in game_questions that reference this game
+                cur.execute("DELETE FROM game_questions WHERE game_id = %s", (game_id,))
+                
+                # Delete the game itself
+                cur.execute("DELETE FROM games WHERE id = %s", (game_id,))
+                
+                conn.commit()
+                return True
+        except Exception as e:
+            conn.rollback()
+            raise e
         finally:
             self.db.return_connection(conn)
     

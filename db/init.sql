@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS questions (
     id SERIAL PRIMARY KEY,
     question VARCHAR(255) NOT NULL,
-    description VARCHAR(255),
-    explanation VARCHAR(255),
+    description VARCHAR(500),
+    explanation VARCHAR(500),
     category VARCHAR(255) NOT NULL,
     difficulty VARCHAR(255) NOT NULL,
     answers jsonb NOT NULL,
