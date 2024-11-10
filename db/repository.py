@@ -36,6 +36,16 @@ class UserRepository:
         finally:
             self.db.return_connection(conn)
 
+    def get_user_by_username(self, username: str) -> Optional[User]:
+        conn = self.db.get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id, username FROM users WHERE username = %s", (username,))
+                result = cur.fetchone()
+                return User(id=result[0], username=result[1]) if result else None
+        finally:
+            self.db.return_connection(conn)
+
 class QuestionRepository:
     def __init__(self, db_connection: DatabaseConnection):
         self.db = db_connection

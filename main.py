@@ -16,6 +16,24 @@ class QuizApplication:
         self.game_repo = GameRepository(self.db)
         self.question_repo = QuestionRepository(self.db)
         self.game_logic = QuizGame(api_key)
+
+    def log_user(self) -> Optional[User]:
+        while True:
+            username = input("Enter your username: ")
+            if not username:
+                print("Username cannot be empty")
+            else:
+                user = self.user_repo.get_user_by_username(username)
+                if user:
+                    return user
+                else:
+                    print("User not found, would you like to register?")
+                    register = input("(y/n): ")
+                    if register.lower() == 'y':
+                        return self.register_user(username)
+                    else:
+                        break
+        return None
         
     def register_user(self, username: str) -> Optional[User]:
         try:
@@ -118,6 +136,7 @@ class QuizApplication:
         print("\nAnswers:")
         for i, answer in enumerate(question.answers):
             print(f"{i+1}. {answer}")
+        print(question.answers)
             
     def play_game(self, game_id: int) -> None:
         try:
@@ -198,10 +217,9 @@ def main():
     app = QuizApplication("Nu4Q4o5IFPwgTUWcEmgWUpwyK06B3yGg3TbmkkTM")
     try:
         # Example usage
-        username = input("Enter your username: ")
-        user = app.register_user(username)
-        if user:
-            print(f"\nWelcome {username}!")
+        user = app.log_user()
+        if user is not None:
+            print(f"\nWelcome {user.username}!")
             while True:
                 try:
                     rounds = int(input("How many questions would you like? (1-10): "))
