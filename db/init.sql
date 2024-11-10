@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS game_questions (
     id SERIAL PRIMARY KEY,
     game_id INTEGER NOT NULL REFERENCES games(id),
     question_id INTEGER NOT NULL REFERENCES questions(id),
-    selected_answer_key VARCHAR(50),
+    selected_answer_index INTEGER,
     is_correct BOOLEAN,
     answered_at TIMESTAMP,
     UNIQUE(game_id, question_id)

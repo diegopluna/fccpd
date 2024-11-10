@@ -32,6 +32,6 @@ class GameQuestion:
     id: int
     game_id: int
     question_id: int
-    selected_answer_key: Optional[str]
+    selected_answer_index: Optional[int]
     is_correct: Optional[bool]
     answered_at: Optional[datetime]

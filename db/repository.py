@@ -103,7 +103,7 @@ class QuestionRepository:
         finally:
             self.db.return_connection(conn)
             
-    def check_answer(self, question_id: int, selected_answer_key: str) -> bool:
+    def check_answer(self, question_id: int, selected_answer_index: int) -> bool:
         conn = self.db.get_connection()
         try:
             with conn.cursor() as cur:
@@ -117,12 +117,12 @@ class QuestionRepository:
                     return False
                     
                 correct_answers = json.loads(result[0])
-                correct_key = f"correct_{selected_answer_key}_correct"
+                correct_key = f"correct_{selected_answer_index}_correct"
                 return correct_answers.get(correct_key, False)
         finally:
             self.db.return_connection(conn)
             
-    def answer_question(self, game_id: int, question_id: int, answer_key: str) -> bool:
+    def answer_question(self, game_id: int, question_id: int, answer_index: int) -> bool:
         try:
             # Get game and validate
             game = self.game_repo.get_game(game_id)
@@ -130,7 +130,7 @@ class QuestionRepository:
                 return False
                 
             # Get correct answer
-            is_correct = self.check_answer(question_id, answer_key)
+            is_correct = self.check_answer(question_id, answer_index)
             
             # Record answer
             conn = self.db.get_connection()
@@ -138,12 +138,12 @@ class QuestionRepository:
                 with conn.cursor() as cur:
                     cur.execute("""
                         UPDATE game_questions 
-                        SET selected_answer_key = %s,
+                        SET selected_answer_index = %s,
                             is_correct = %s,
                             answered_at = %s
                         WHERE game_id = %s AND question_id = %s
                         RETURNING id
-                    """, (answer_key, is_correct, datetime.now(), game_id, question_id))
+                    """, (answer_index, is_correct, datetime.now(), game_id, question_id))
                     conn.commit()
                     return True
             finally:
@@ -218,7 +218,7 @@ class GameRepository:
         try:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT id, game_id, question_id, selected_answer_key, 
+                    SELECT id, game_id, question_id, selected_answer_index, 
                            is_correct, answered_at
                     FROM game_questions 
                     WHERE game_id = %s
@@ -228,7 +228,7 @@ class GameRepository:
                         id=row[0],
                         game_id=row[1],
                         question_id=row[2],
-                        selected_answer_key=row[3],
+                        selected_answer_index=row[3],
                         is_correct=row[4],
                         answered_at=row[5]
                     )
