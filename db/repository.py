@@ -160,10 +160,10 @@ class QuestionRepository:
     def answer_question(self, game_id: int, question_id: int, answer_index: int, is_correct: bool) -> bool:
         try:
             # Get game and validate
-            game = self.game_repo.get_game(game_id)
-            question = self.get_question_by_id(question_id)
-            if not game or not question:
-                return False
+            # game = game_repo.get_game(game_id)
+            # question = self.get_question_by_id(question_id)
+            # if not game or not question:
+            #     return False
             
             # Record answer
             conn = self.db.get_connection()
@@ -175,14 +175,14 @@ class QuestionRepository:
                             is_correct = %s,
                             answered_at = %s
                         WHERE game_id = %s AND question_id = %s
-                        RETURNING id
                     """, (answer_index, is_correct, datetime.now(), game_id, question_id))
                     conn.commit()
-                    return True
+                    return cur.rowcount > 0  # Ensure the update was successful
             finally:
                 self.db.return_connection(conn)
                 
         except Exception as e:
+            print(e)
             return False
             
 class GameRepository:
