@@ -1,15 +1,16 @@
 from psycopg2 import pool
+from os import environ
 
 class DatabaseConnection:
     def __init__(self):
         self.connection_pool = pool.SimpleConnectionPool(
             minconn=1,
             maxconn=10,
-            database="fccpd",
-            user="postgres",
-            password="admin",
-            host="localhost",
-            port="5435"
+            database=environ.get('POSTGRES_DB', 'postgres'),
+            user=environ.get('POSTGRES_USER', 'admin'),
+            password=environ.get('POSTGRES_PASSWORD', 'admin'),
+            host=environ.get('POSTGRES_HOST', 'localhost'),
+            port=environ.get('POSTGRES_PORT', '5432')
         )
     
     def get_connection(self):

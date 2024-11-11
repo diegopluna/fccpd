@@ -16,8 +16,8 @@ class Question:
     explanation: str
     category: str
     difficulty: str
-    answers: Dict[str, str]
-    correct_answers: Dict[str,bool]
+    answers: List[str]
+    correct_answers: List[bool]
     
 @dataclass
 class Game:

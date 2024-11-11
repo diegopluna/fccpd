@@ -6,7 +6,7 @@ from db.repository import UserRepository, QuestionRepository, GameRepository
 from game_logic import QuizGame
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class QuizApplication:
@@ -406,7 +406,7 @@ class QuizApplication:
             category=input("Enter category: "),
             difficulty=input("Enter difficulty: "),
             answers=[input(f"Enter answer {_+1}: ") for _ in range(4)],
-            correct_answers=[input(f"Is answer {_+1} correct? (true/false): ") == 'true' for _ in range(4)]
+            correct_answers=[input(f"Is answer {_+1} correct? (y/n): ") == 'y' for _ in range(4)]
         )
         saved_question = self.question_repo.create_question(question)
         if saved_question:
@@ -486,8 +486,8 @@ class QuizApplication:
             print(f"Category: {question.category}")
             print(f"Difficulty: {question.difficulty}")
             print("Answers:")
-            for i, (answer, correct) in enumerate(zip(question.answers, question.correct_answers)):
-                print(f"{i+1}. {answer} ({'Right' if correct else 'Wrong'})")
+            for i, answer in enumerate(question.answers):
+                print(f"{i+1}. {answer} ({'Right' if question.correct_answers[i] else 'Wrong'})")
         else:
             print("Question not found")
         self.press_to_continue()
@@ -686,7 +686,7 @@ class QuizApplication:
                     answers=[q['answers'].get(f'answer_{l}', '') for l in "abcdef" if q['answers'].get(f'answer_{l}') is not None],
                     correct_answers=[q['correct_answers'].get(f'answer_{l}_correct', 'false') == 'true' for l in "abcdef"]
                 )
-                print(question)
+                # print(question)
                 
                 # Save question
                 logger.debug(f"Saving question to database")
@@ -747,7 +747,7 @@ class QuizApplication:
         print("\nAnswers:")
         for i, answer in enumerate(question.answers):
             print(f"{i+1}. {answer}")
-        print(question.correct_answers)
+        # print(question.correct_answers)
             
     def play_game(self, game_id: int) -> None:
         try:
@@ -824,6 +824,7 @@ class QuizApplication:
         
 def main():
     app = QuizApplication("Nu4Q4o5IFPwgTUWcEmgWUpwyK06B3yGg3TbmkkTM")
+    input('Press Enter to continue...')
     try:
         app.main_menu()
     finally:
